@@ -2,13 +2,8 @@ import telebot
 from telebot import types
 import logging
 
-# Токен твоего бота (получи у @BotFather)
-TOKEN = '8573515881:AAHAwcQu0nkaR3ZnT_zBndku0iZikFr7azs'
-
-# Инициализация бота
 bot = telebot.TeleBot(TOKEN)
 
-# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
 # Контакты продавцов и админов (замени на свои)
@@ -179,13 +174,13 @@ def support_command(message):
 def callback_handler(call):
     if call.data == "premium":
         text = (
-            "⭐️ *Премиум статус на месяц*\n\n"
+            "⭐️ *Премиум статус на месяц / на год*\n\n"
             "🌟 *Преимущества премиум статуса:*\n"
             "• Уникальный значок в профиле\n"
             "• Доступ к эксклюзивным функциям\n"
             "• Приоритетная поддержка\n"
             "• X2 Эло \n\n"
-            "💰 *Цена:* 250 рублей\n\n"
+            "💰 *Цена:* 250 рублей за месяц / 905 за год\n\n"
             "Для покупки свяжитесь с продавцом: "
         )
         
@@ -248,22 +243,10 @@ def callback_handler(call):
             "💰 *Цена:* 50 рублей\n\n"
             "Для заказа напишите продавцу: "
         )
-
-        elif call.data == "premiumgod":
-            text = (
-            "⭐️ *Премиум статус на год*\n\n"
-            "🌟 *Преимущества премиум статуса:*\n"
-            "• Уникальный значок в профиле\n"
-            "• Доступ к эксклюзивным функциям\n"
-            "• Приоритетная поддержка\n"
-            "• X2 Эло \n\n"
-            "💰 *Цена:* 905 рублей\n\n"
-            "Для покупки свяжитесь с продавцом: "
-        )
         
         keyboard = types.InlineKeyboardMarkup()
         btn_buy = types.InlineKeyboardButton(
-            text="💳 Купить", 
+            text="🔇 Снять мут", 
             url=f"https://t.me/hp404prodv"
         )
         btn_back = types.InlineKeyboardButton(
@@ -272,22 +255,7 @@ def callback_handler(call):
         )
         keyboard.add(btn_buy, btn_back)
         
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "back_to_catalog":
-        catalog_text = (
-            "🛒 *Наш каталог товаров:*\n\n"
-            "Выберите интересующую услугу:"
-        )
-        
-        keyboard = types.InlineKeyboardMarkup(row_width=1)
-        btn_premiumgod = types.InlineKeyboardButton(text="⭐️ Премиум статус на год", callback_data="premiumgod")
+        keyboard = types.InlineKeyboardMarkup(row_width=1)       
         btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус на месяц", callback_data="premium")
         btn_unban = types.InlineKeyboardButton(text="🔓 Разбан", callback_data="unban")
         btn_unmute = types.InlineKeyboardButton(text="🔇 Размут", callback_data="unmute")
