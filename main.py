@@ -38,13 +38,15 @@ def main_keyboard():
 def start_command(message):
     user_name = message.from_user.first_name
     welcome_text = (
-        f"👋 Привет,Ты находишься в магазине 404hp faceit {user_name}!\n\n"
-        "Добро пожаловать в наш магазин премиум-услуг!\n"
-        "Здесь ты можешь приобрести:\n"
-        "✨ Премиум статус\n"
-        "🔓 Разбан аккаунта\n"
-        "🔇 Снятие мута\n\n"
-        "Выбери нужный раздел в меню ниже:"
+        f"👋 Привет, ты находишься в 404HP SHOP! 
+
+» Здесь ты можешь приобрести: 
+
+🌟 — Premium Status. 
+🔒 — Разбан аккаунта.
+📢 — Снятие мута. 
+
+ℹ️ Выбери необходимый раздел в меню ниже:"
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=main_keyboard())
 
@@ -52,10 +54,17 @@ def start_command(message):
 @bot.message_handler(func=lambda message: message.text == "📞 Контакты")
 def contacts_command(message):
     contacts_text = (
-        "📞 *Контакты продавцов:*\n\n"
-        f"👤 linner: Продавец по отделам Разбан/размут/покупки  премиум"
-        f"👤 Asquzyy: Продавец по отделам Разбан/размут/покупки премиум "       
-        "💬 По всем вопросам обращайтесь к нашим продавцам!"
+        "📞 Контакты продавцов: 
+
+👤 L1nner: 
+— Продавец по отделам: 
+Разбан / Размут / Покупка премиум статуса. 
+
+👤 asquzyyy: 
+— Продавец по отделам: 
+Разбан / Размут / Покупка премиум статуса. 
+
+💬 По всем возникающим вопросам обращатся к нашим продавцам ‼️"
     )
     
     # Создаем инлайн кнопки
@@ -96,9 +105,13 @@ def catalog_command(message):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     
     btn_premium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус", 
+        text="⭐️ Премиум статус на месяц", 
         callback_data="premium"
     )
+    btn_premium = types.InlineKeyboardButton(
+        text="⭐️ Премиум статус на год", 
+        callback_data="premiumgod"
+    )    
     btn_unban = types.InlineKeyboardButton(
         text="🔓 Разбан", 
         callback_data="unban"
@@ -111,8 +124,7 @@ def catalog_command(message):
         text="🔙 В главное меню", 
         callback_data="back_to_main"
     )
-    
-    keyboard.add(btn_premium, btn_unban, btn_unmute, btn_back)
+    keyboard.add(btn_premium, btn_premingod, btn_unban, btn_unmute, btn_back)
     
     bot.send_message(
         message.chat.id, 
@@ -125,12 +137,18 @@ def catalog_command(message):
 @bot.message_handler(func=lambda message: message.text == "🆘 Поддержка")
 def support_command(message):
     support_text = (
-        "🆘 *Служба поддержки*\n\n"
-        "По вопросам покупок и техническим проблемам обращайтесь:\n\n"
-        f"👨‍💻 Linner: Руководитель  проекта  404hp, также является  продавцом по отделам разбана/размута/покупки премиум"
-        "👨‍💻 Аsquzyy: Главный администратор  на фей\n"
-        "⏰ Время работы: круглосуточно.Если мы не отвечаем то заняты ожидайте  пожалуйста  ответа \n"
-        "📝 Опишите вашу проблему - мы поможем!"
+        "📢 Служба поддержки 
+— По вопросам покупок, техническим проблемам обращайтесь: 
+
+👤 L1nner: 
+— Владелец проекта 404HP, также является продавцом по отделам. 
+
+👤 asquzyyy: 
+— Руководитель проекта 404HP FACEIT, также является продавцом по отделам
+
+⏳Время работы: 
+— Круглосуточно, если не отвечаем, то скорее всего заняты и уже скоро ответим! 
+📝 Опишите вашу проблему — мы поможем!"
     )
     
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -166,7 +184,7 @@ def callback_handler(call):
             "• Уникальный значок в профиле\n"
             "• Доступ к эксклюзивным функциям\n"
             "• Приоритетная поддержка\n"
-            "• Специальные предложения\n\n"
+            "• X2 Эло \n\n"
             "💰 *Цена:* 250 рублей\n\n"
             "Для покупки свяжитесь с продавцом: "
         )
@@ -230,10 +248,22 @@ def callback_handler(call):
             "💰 *Цена:* 50 рублей\n\n"
             "Для заказа напишите продавцу: "
         )
+
+        elif call.data == "premiumgod":
+            text = (
+            "⭐️ *Премиум статус на год*\n\n"
+            "🌟 *Преимущества премиум статуса:*\n"
+            "• Уникальный значок в профиле\n"
+            "• Доступ к эксклюзивным функциям\n"
+            "• Приоритетная поддержка\n"
+            "• X2 Эло \n\n"
+            "💰 *Цена:* 905 рублей\n\n"
+            "Для покупки свяжитесь с продавцом: "
+        )
         
         keyboard = types.InlineKeyboardMarkup()
         btn_buy = types.InlineKeyboardButton(
-            text="🔇 Снять мут", 
+            text="💳 Купить", 
             url=f"https://t.me/hp404prodv"
         )
         btn_back = types.InlineKeyboardButton(
@@ -257,7 +287,8 @@ def callback_handler(call):
         )
         
         keyboard = types.InlineKeyboardMarkup(row_width=1)
-        btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус", callback_data="premium")
+        btn_premiumgod = types.InlineKeyboardButton(text="⭐️ Премиум статус на год", callback_data="premiumgod")
+        btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус на месяц", callback_data="premium")
         btn_unban = types.InlineKeyboardButton(text="🔓 Разбан", callback_data="unban")
         btn_unmute = types.InlineKeyboardButton(text="🔇 Размут", callback_data="unmute")
         btn_back = types.InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main")
