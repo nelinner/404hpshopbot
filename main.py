@@ -2,17 +2,19 @@ import telebot
 from telebot import types
 import logging
 
+TOKEN = '8573515881:AAHAwcQu0nkaR3ZnT_zBndku0iZikFr7azs'
+
 logging.basicConfig(level=logging.INFO)
 
 # Контакты продавцов и админов (замени на свои)
 SELLERS = {
-    'seller1': '@seller1_username',
-    'seller2': '@seller2_username', 
+    'seller1': '@nelinner',
+    'seller2': '@asquzyyy', 
 }
 
 ADMINS = {
-    'admin1': '@admin1_username',
-    'admin2': '@admin2_username',
+    'admin1': '@nelinner',
+    'admin2': '@asquzyyy',
 }
 
 # Создание главного меню
