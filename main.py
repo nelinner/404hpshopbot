@@ -2,8 +2,6 @@ import telebot
 from telebot import types
 import logging
 
-bot = telebot.TeleBot(TOKEN)
-
 logging.basicConfig(level=logging.INFO)
 
 # Контакты продавцов и админов (замени на свои)
