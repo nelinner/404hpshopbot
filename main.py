@@ -2,19 +2,24 @@ import telebot
 from telebot import types
 import logging
 
+# Токен твоего бота (получи у @BotFather)
 TOKEN = '8573515881:AAHAwcQu0nkaR3ZnT_zBndku0iZikFr7azs'
 
+# Инициализация бота
+bot = telebot.TeleBot(TOKEN)
+
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
 # Контакты продавцов и админов (замени на свои)
 SELLERS = {
     'seller1': '@nelinner',
-    'seller2': '@asquzyyy', 
+    'seller2': '@seller2_username', 
 }
 
 ADMINS = {
     'admin1': '@nelinner',
-    'admin2': '@asquzyyy',
+    'admin2': '@admin2_username',
 }
 
 # Создание главного меню
@@ -33,15 +38,13 @@ def main_keyboard():
 def start_command(message):
     user_name = message.from_user.first_name
     welcome_text = (
-        f"👋 Привет, ты находишься в 404HP SHOP! 
-
-» Здесь ты можешь приобрести: 
-
-🌟 — Premium Status. 
-🔒 — Разбан аккаунта.
-📢 — Снятие мута. 
-
-ℹ️ Выбери необходимый раздел в меню ниже:"
+        f"👋 Привет,Ты находишься в магазине 404hp faceit {user_name}!\n\n"
+        "Добро пожаловать в наш магазин премиум-услуг!\n"
+        "Здесь ты можешь приобрести:\n"
+        ""— ✨ Премиум статус\n"
+        "— 🔓 Разбан аккаунта\n"
+        "— 🔇 Снятие мута\n\n"
+        "Выбери нужный раздел в меню ниже:"
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=main_keyboard())
 
@@ -49,17 +52,10 @@ def start_command(message):
 @bot.message_handler(func=lambda message: message.text == "📞 Контакты")
 def contacts_command(message):
     contacts_text = (
-        "📞 Контакты продавцов: 
-
-👤 L1nner: 
-— Продавец по отделам: 
-Разбан / Размут / Покупка премиум статуса. 
-
-👤 asquzyyy: 
-— Продавец по отделам: 
-Разбан / Размут / Покупка премиум статуса. 
-
-💬 По всем возникающим вопросам обращатся к нашим продавцам ‼️"
+        "📞 *Контакты продавцов:*\n\n"
+        f"👤 linner: Продавец по отделам Разбан/размут/покупки  премиум"
+        f"👤 Asquzyy: Продавец по отделам Разбан/размут/покупки премиум "       
+        "💬 По всем вопросам обращайтесь к нашим продавцам!"
     )
     
     # Создаем инлайн кнопки
@@ -100,13 +96,9 @@ def catalog_command(message):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     
     btn_premium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус на месяц", 
+        text="⭐️ Премиум статус", 
         callback_data="premium"
     )
-    btn_premium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус на год", 
-        callback_data="premiumgod"
-    )    
     btn_unban = types.InlineKeyboardButton(
         text="🔓 Разбан", 
         callback_data="unban"
@@ -119,7 +111,8 @@ def catalog_command(message):
         text="🔙 В главное меню", 
         callback_data="back_to_main"
     )
-    keyboard.add(btn_premium, btn_premingod, btn_unban, btn_unmute, btn_back)
+    
+    keyboard.add(btn_premium, btn_unban, btn_unmute, btn_back)
     
     bot.send_message(
         message.chat.id, 
@@ -132,18 +125,13 @@ def catalog_command(message):
 @bot.message_handler(func=lambda message: message.text == "🆘 Поддержка")
 def support_command(message):
     support_text = (
-        "📢 Служба поддержки 
-— По вопросам покупок, техническим проблемам обращайтесь: 
+        "🆘 *Служба поддержки*\n\n"
+        "По вопросам покупок и техническим проблемам обращайтесь:\n\n"
+        f"👨‍💻 Linner: Руководитель  проекта  404hp, также является  продавцом по отделам разбана/размута/покупки премиум"
 
-👤 L1nner: 
-— Владелец проекта 404HP, также является продавцом по отделам. 
-
-👤 asquzyyy: 
-— Руководитель проекта 404HP FACEIT, также является продавцом по отделам
-
-⏳Время работы: 
-— Круглосуточно, если не отвечаем, то скорее всего заняты и уже скоро ответим! 
-📝 Опишите вашу проблему — мы поможем!"
+"👨‍💻 Аsquzyy: Главный администратор  на фей\n"
+        "⏰ Время работы: круглосуточно.Если мы не отвечаем то заняты ожидайте  пожалуйста  ответа \n"
+        "📝 Опишите вашу проблему - мы поможем!"
     )
     
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -174,13 +162,13 @@ def support_command(message):
 def callback_handler(call):
     if call.data == "premium":
         text = (
-            "⭐️ *Премиум статус на месяц / на год*\n\n"
+            "⭐️ *Премиум статус на месяц/год*\n\n"
             "🌟 *Преимущества премиум статуса:*\n"
             "• Уникальный значок в профиле\n"
             "• Доступ к эксклюзивным функциям\n"
             "• Приоритетная поддержка\n"
-            "• X2 Эло \n\n"
-            "💰 *Цена:* 250 рублей за месяц / 905 за год\n\n"
+            "• Специальные предложения\n\n"
+            "💰 *Цена:* 250 рублей на месяц / 905 на год\n\n"
             "Для покупки свяжитесь с продавцом: "
         )
         
@@ -255,8 +243,23 @@ def callback_handler(call):
         )
         keyboard.add(btn_buy, btn_back)
         
-        keyboard = types.InlineKeyboardMarkup(row_width=1)       
-        btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус на месяц", callback_data="premium")
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+
+text=text,
+            parse_mode="Markdown",
+            reply_markup=keyboard
+        )
+        
+    elif call.data == "back_to_catalog":
+        catalog_text = (
+            "🛒 *Наш каталог товаров:*\n\n"
+            "Выберите интересующую услугу:"
+        )
+        
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус", callback_data="premium")
         btn_unban = types.InlineKeyboardButton(text="🔓 Разбан", callback_data="unban")
         btn_unmute = types.InlineKeyboardButton(text="🔇 Размут", callback_data="unmute")
         btn_back = types.InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main")
@@ -284,6 +287,6 @@ def other_messages(message):
     )
 
 # Запуск бота
-if __name__ == '__main__':
+if name == 'main':
     print("Бот запущен!")
     bot.infinity_polling()
