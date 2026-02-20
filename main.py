@@ -13,12 +13,12 @@ logging.basicConfig(level=logging.INFO)
 
 # Контакты продавцов и админов (замени на свои)
 SELLERS = {
-    'seller1': '@nelinner',
+    'seller1': '@seller1_username',
     'seller2': '@seller2_username', 
 }
 
 ADMINS = {
-    'admin1': '@nelinner',
+    'admin1': '@admin1_username',
     'admin2': '@admin2_username',
 }
 
@@ -41,9 +41,9 @@ def start_command(message):
         f"👋 Привет,Ты находишься в магазине 404hp faceit {user_name}!\n\n"
         "Добро пожаловать в наш магазин премиум-услуг!\n"
         "Здесь ты можешь приобрести:\n"
-        ""— ✨ Премиум статус\n"
-        "— 🔓 Разбан аккаунта\n"
-        "— 🔇 Снятие мута\n\n"
+        "✨ Премиум статус\n"
+        "🔓 Разбан аккаунта\n"
+        "🔇 Снятие мута\n\n"
         "Выбери нужный раздел в меню ниже:"
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=main_keyboard())
@@ -53,9 +53,9 @@ def start_command(message):
 def contacts_command(message):
     contacts_text = (
         "📞 *Контакты продавцов:*\n\n"
-        f"👤 linner: Продавец по отделам Разбан/размут/покупки  премиум"
-        f"👤 Asquzyy: Продавец по отделам Разбан/размут/покупки премиум "       
-        "💬 По всем вопросам обращайтесь к нашим продавцам!"
+        """👤 linner: Продавец по отделам Разбан/размут/покупки  премиум
+👤 Asquzyy: Продавец по отделам Разбан/размут/покупки премиум 
+💬 По всем вопросам обращайтесь к нашим продавцам!"""
     )
     
     # Создаем инлайн кнопки
@@ -96,9 +96,13 @@ def catalog_command(message):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     
     btn_premium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус", 
+        text="⭐️ Премиум статус на месяц", 
         callback_data="premium"
     )
+    btn_vipremium = types.InlineKeyboardButton(
+        text="⭐️ Премиум статус на год", 
+        callback_data="vipremium"
+    )    
     btn_unban = types.InlineKeyboardButton(
         text="🔓 Разбан", 
         callback_data="unban"
@@ -112,7 +116,7 @@ def catalog_command(message):
         callback_data="back_to_main"
     )
     
-    keyboard.add(btn_premium, btn_unban, btn_unmute, btn_back)
+    keyboard.add(btn_premium, btn_vipremium, btn_unban, btn_unmute, btn_back)
     
     bot.send_message(
         message.chat.id, 
@@ -127,11 +131,10 @@ def support_command(message):
     support_text = (
         "🆘 *Служба поддержки*\n\n"
         "По вопросам покупок и техническим проблемам обращайтесь:\n\n"
-        f"👨‍💻 Linner: Руководитель  проекта  404hp, также является  продавцом по отделам разбана/размута/покупки премиум"
-
-"👨‍💻 Аsquzyy: Главный администратор  на фей\n"
-        "⏰ Время работы: круглосуточно.Если мы не отвечаем то заняты ожидайте  пожалуйста  ответа \n"
-        "📝 Опишите вашу проблему - мы поможем!"
+        f"""👨‍💻 Linner: Руководитель  проекта  404hp, также является  продавцом по отделам разбана/размута/покупки премиум
+👨‍💻 Аsquzyy: Главный администратор  на фей\n
+⏰ Время работы: круглосуточно.Если мы не отвечаем то заняты ожидайте  пожалуйста  ответа \n
+ℹ️ Опишите вашу проблему - мы поможем!"""
     )
     
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -162,13 +165,44 @@ def support_command(message):
 def callback_handler(call):
     if call.data == "premium":
         text = (
-            "⭐️ *Премиум статус на месяц/год*\n\n"
+            "⭐️ *Премиум статус на месяц*\n\n"
             "🌟 *Преимущества премиум статуса:*\n"
             "• Уникальный значок в профиле\n"
             "• Доступ к эксклюзивным функциям\n"
             "• Приоритетная поддержка\n"
             "• Специальные предложения\n\n"
-            "💰 *Цена:* 250 рублей на месяц / 905 на год\n\n"
+            "💰 *Цена:* 250 рублей\n\n"
+            "Для покупки свяжитесь с продавцом: "
+        )
+        
+        keyboard = types.InlineKeyboardMarkup()
+        btn_buy = types.InlineKeyboardButton(
+            text="💳 Купить", 
+            url=f"https://t.me/hp404prodv"
+        )
+        btn_back = types.InlineKeyboardButton(
+            text="🔙 Назад к каталогу", 
+            callback_data="back_to_catalog"
+        )
+        keyboard.add(btn_buy, btn_back)
+        
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text=text,
+            parse_mode="Markdown",
+            reply_markup=keyboard
+        )
+        
+    elif call.data == "vipremium":
+        text = (
+            "⭐️ *Премиум статус на год*\n\n"
+            "🌟 *Преимущества премиум статуса:*\n"
+            "• Уникальный значок в профиле\n"
+            "• Доступ к эксклюзивным функциям\n"
+            "• Приоритетная поддержка\n"
+            "• Специальные предложения\n\n"
+            "💰 *Цена:* 905 рублей\n\n"
             "Для покупки свяжитесь с продавцом: "
         )
         
@@ -246,8 +280,7 @@ def callback_handler(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-
-text=text,
+            text=text,
             parse_mode="Markdown",
             reply_markup=keyboard
         )
@@ -260,10 +293,11 @@ text=text,
         
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус", callback_data="premium")
+        btn_vipremium = types.InlineKeyboardButton(text="⭐️ Премиум на год", callback_data ="vipremium")
         btn_unban = types.InlineKeyboardButton(text="🔓 Разбан", callback_data="unban")
         btn_unmute = types.InlineKeyboardButton(text="🔇 Размут", callback_data="unmute")
         btn_back = types.InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main")
-        keyboard.add(btn_premium, btn_unban, btn_unmute, btn_back)
+        keyboard.add(btn_premium, btn_vipremium, btn_unban, btn_unmute, btn_back)
         
         bot.edit_message_text(
             chat_id=call.message.chat.id,
@@ -287,6 +321,6 @@ def other_messages(message):
     )
 
 # Запуск бота
-if name == 'main':
+if __name__ == '__main__':
     print("Бот запущен!")
     bot.infinity_polling()
