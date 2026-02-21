@@ -1,326 +1,169 @@
 import telebot
 from telebot import types
-import logging
+import time
 
-# Токен твоего бота (получи у @BotFather)
-TOKEN = '8573515881:AAHAwcQu0nkaR3ZnT_zBndku0iZikFr7azs'
-
-# Инициализация бота
+# Замени 'YOUR_BOT_TOKEN' на токен твоего бота, полученный от @BotFather
+TOKEN = '8406682629:AAEfA-7QYFqqp8d7UrQ5cEqrzOWLphzNl2U'
 bot = telebot.TeleBot(TOKEN)
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
-
-# Контакты продавцов и админов (замени на свои)
-SELLERS = {
-    'seller1': '@seller1_username',
-    'seller2': '@seller2_username', 
+# --- Словарь с товарами (цена может быть любой, например, в условных единицах) ---
+products = {
+    'premium_month': {'name': 'Премиум статус (1 месяц)', 'price': 250},
+    'premium_year': {'name': 'Премиум статус (1 год)', 'price': 905},
+    'unban': {'name': 'Разбан', 'price': 75},
+    'unmute': {'name': 'Размут', 'price': 50}
 }
 
-ADMINS = {
-    'admin1': '@admin1_username',
-    'admin2': '@admin2_username',
-}
+# --- Функция для удаления предыдущего сообщения ---
+def delete_previous_message(message):
+    try:
+        bot.delete_message(message.chat.id, message.message_id - 1)
+    except Exception as e:
+        print(f"Не удалось удалить сообщение: {e}") # Игнорируем, если сообщение уже удалено или слишком старое
 
-# Создание главного меню
-def main_keyboard():
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    buttons = [
-        types.KeyboardButton("📞 Контакты"),
-        types.KeyboardButton("🛒 Каталог товаров"),
-        types.KeyboardButton("🆘 Поддержка")
-    ]
-    keyboard.add(*buttons)
-    return keyboard
-
-# Обработчик команды /start
+# --- Обработчик команды /start ---
 @bot.message_handler(commands=['start'])
-def start_command(message):
-    user_name = message.from_user.first_name
+def send_welcome(message):
+    # Удаляем предыдущее сообщение с командой /start, чтобы не засорять чат
+    delete_previous_message(message)
+
+    # Создаем клавиатуру главного меню
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    btn_rules = types.InlineKeyboardButton("📜 Регламент магазина", callback_data='rules')
+    btn_products = types.InlineKeyboardButton("🛍️ Товары", callback_data='products_main')
+    btn_support = types.InlineKeyboardButton("🆘 Тех. поддержка", callback_data='support')
+    markup.add(btn_rules, btn_products, btn_support)
+
+    # Текст приветствия
     welcome_text = (
-        f"👋 Привет,Ты находишься в магазине 404hp faceit {user_name}!\n\n"
-        "Добро пожаловать в наш магазин премиум-услуг!\n"
-        "Здесь ты можешь приобрести:\n"
-        "✨ Премиум статус\n"
-        "🔓 Разбан аккаунта\n"
-        "🔇 Снятие мута\n\n"
-        "Выбери нужный раздел в меню ниже:"
+        f"👋 Привет, {message.from_user.first_name}!\n"
+        f"Добро пожаловать в наш магазин.\n"
+        f"Используй кнопки ниже для навигации."
     )
-    bot.send_message(message.chat.id, welcome_text, reply_markup=main_keyboard())
+    bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 
-# Обработчик кнопки "Контакты"
-@bot.message_handler(func=lambda message: message.text == "📞 Контакты")
-def contacts_command(message):
-    contacts_text = (
-        "📞 *Контакты продавцов:*\n\n"
-        """👤 linner: Продавец по отделам Разбан/размут/покупки  премиум
-👤 Asquzyy: Продавец по отделам Разбан/размут/покупки премиум 
-💬 По всем вопросам обращайтесь к нашим продавцам!"""
-    )
-    
-    # Создаем инлайн кнопки
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    
-    # Кнопки для связи с продавцами
-    btn1 = types.InlineKeyboardButton(
-        text="📱 Связаться с linner", 
-        url=f"https://t.me/nelinner"
-    )
-    btn2 = types.InlineKeyboardButton(
-        text="📱 Связаться с Asquzyy ", 
-        url=f"https://t.me/asquzyyy"
-    )
-    
-    btn_back = types.InlineKeyboardButton(
-        text="🔙 В главное меню", 
-        callback_data="back_to_main"
-    )
-    
-    keyboard.add(btn1, btn2, btn_back)
-    
-    bot.send_message(
-        message.chat.id, 
-        contacts_text, 
-        parse_mode="Markdown", 
-        reply_markup=keyboard
-    )
-
-# Обработчик кнопки "Каталог товаров"
-@bot.message_handler(func=lambda message: message.text == "🛒 Каталог товаров")
-def catalog_command(message):
-    catalog_text = (
-        "🛒 *Наш каталог товаров:*\n\n"
-        "Выберите интересующую услугу:"
-    )
-    
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    
-    btn_premium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус на месяц", 
-        callback_data="premium"
-    )
-    btn_vipremium = types.InlineKeyboardButton(
-        text="⭐️ Премиум статус на год", 
-        callback_data="vipremium"
-    )    
-    btn_unban = types.InlineKeyboardButton(
-        text="🔓 Разбан", 
-        callback_data="unban"
-    )
-    btn_unmute = types.InlineKeyboardButton(
-        text="🔇 Размут", 
-        callback_data="unmute"
-    )
-    btn_back = types.InlineKeyboardButton(
-        text="🔙 В главное меню", 
-        callback_data="back_to_main"
-    )
-    
-    keyboard.add(btn_premium, btn_vipremium, btn_unban, btn_unmute, btn_back)
-    
-    bot.send_message(
-        message.chat.id, 
-        catalog_text, 
-        parse_mode="Markdown", 
-        reply_markup=keyboard
-    )
-
-# Обработчик кнопки "Поддержка"
-@bot.message_handler(func=lambda message: message.text == "🆘 Поддержка")
-def support_command(message):
-    support_text = (
-        "🆘 *Служба поддержки*\n\n"
-        "По вопросам покупок и техническим проблемам обращайтесь:\n\n"
-        f"""👨‍💻 Linner: Руководитель  проекта  404hp, также является  продавцом по отделам разбана/размута/покупки премиум
-👨‍💻 Аsquzyy: Главный администратор  на фей\n
-⏰ Время работы: круглосуточно.Если мы не отвечаем то заняты ожидайте  пожалуйста  ответа \n
-ℹ️ Опишите вашу проблему - мы поможем!"""
-    )
-    
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    
-    btn_admin1 = types.InlineKeyboardButton(
-        text="💬 Написать админу linner", 
-        url=f"https://t.me/nelinner"
-    )
-    btn_admin2 = types.InlineKeyboardButton(
-        text="💬 Написать админу Asquzyy", 
-        url=f"https://t.me/asquzyyy"
-    )
-    btn_back = types.InlineKeyboardButton(
-        text="🔙 В главное меню", 
-        callback_data="back_to_main"
-    )
-    
-    keyboard.add(btn_admin1, btn_admin2, btn_back)
-    
-    bot.send_message(
-        message.chat.id, 
-        support_text, 
-        parse_mode="Markdown", 
-        reply_markup=keyboard
-    )
-
+# --- Обработчик нажатий на инлайн-кнопки (все меню) ---
 @bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    if call.data == "premium":
-        text = (
-            "⭐️ *Премиум статус на месяц*\n\n"
-            "🌟 *Преимущества премиум статуса:*\n"
-            "• Уникальный значок в профиле\n"
-            "• Доступ к эксклюзивным функциям\n"
-            "• Приоритетная поддержка\n"
-            "• Специальные предложения\n\n"
-            "💰 *Цена:* 250 рублей\n\n"
-            "Для покупки свяжитесь с продавцом: "
-        )
-        
-        keyboard = types.InlineKeyboardMarkup()
-        btn_buy = types.InlineKeyboardButton(
-            text="💳 Купить", 
-            url=f"https://t.me/hp404prodv"
-        )
-        btn_back = types.InlineKeyboardButton(
-            text="🔙 Назад к каталогу", 
-            callback_data="back_to_catalog"
-        )
-        keyboard.add(btn_buy, btn_back)
-        
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "vipremium":
-        text = (
-            "⭐️ *Премиум статус на год*\n\n"
-            "🌟 *Преимущества премиум статуса:*\n"
-            "• Уникальный значок в профиле\n"
-            "• Доступ к эксклюзивным функциям\n"
-            "• Приоритетная поддержка\n"
-            "• Специальные предложения\n\n"
-            "💰 *Цена:* 905 рублей\n\n"
-            "Для покупки свяжитесь с продавцом: "
-        )
-        
-        keyboard = types.InlineKeyboardMarkup()
-        btn_buy = types.InlineKeyboardButton(
-            text="💳 Купить", 
-            url=f"https://t.me/hp404prodv"
-        )
-        btn_back = types.InlineKeyboardButton(
-            text="🔙 Назад к каталогу", 
-            callback_data="back_to_catalog"
-        )
-        keyboard.add(btn_buy, btn_back)
-        
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "unban":
-        text = (
-            "🔓 *Разбан аккаунта*\n\n"
-            "📋 *Услуга разблокировки аккаунта:*\n"
-            "• Снятие блокировки\n"
-            "• Восстановление доступа\n"
-            "• Сохранение всех данных\n\n"
-            "💰 *Цена:* 75 рублей\n\n"
-            "Для заказа напишите продавцу: "
-        )
-        
-        keyboard = types.InlineKeyboardMarkup()
-        btn_buy = types.InlineKeyboardButton(
-            text="🔓 Заказать разбан", 
-            url=f"https://t.me/hp404prodv"
-        )
-        btn_back = types.InlineKeyboardButton(
-            text="🔙 Назад к каталогу", 
-            callback_data="back_to_catalog"
-        )
-        keyboard.add(btn_buy, btn_back)
-        
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "unmute":
-        text = (
-            "🔇 *Снятие мута*\n\n"
-            "📋 *Услуга снятия ограничений:*\n"
-            "• Снятие мута в чатах\n"
-            "• Возврат возможности писать\n"
-            "• Быстрое решение проблемы\n\n"
-            "💰 *Цена:* 50 рублей\n\n"
-            "Для заказа напишите продавцу: "
-        )
-        
-        keyboard = types.InlineKeyboardMarkup()
-        btn_buy = types.InlineKeyboardButton(
-            text="🔇 Снять мут", 
-            url=f"https://t.me/hp404prodv"
-        )
-        btn_back = types.InlineKeyboardButton(
-            text="🔙 Назад к каталогу", 
-            callback_data="back_to_catalog"
-        )
-        keyboard.add(btn_buy, btn_back)
-        
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "back_to_catalog":
-        catalog_text = (
-            "🛒 *Наш каталог товаров:*\n\n"
-            "Выберите интересующую услугу:"
-        )
-        
-        keyboard = types.InlineKeyboardMarkup(row_width=1)
-        btn_premium = types.InlineKeyboardButton(text="⭐️ Премиум статус", callback_data="premium")
-        btn_vipremium = types.InlineKeyboardButton(text="⭐️ Премиум на год", callback_data ="vipremium")
-        btn_unban = types.InlineKeyboardButton(text="🔓 Разбан", callback_data="unban")
-        btn_unmute = types.InlineKeyboardButton(text="🔇 Размут", callback_data="unmute")
-        btn_back = types.InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main")
-        keyboard.add(btn_premium, btn_vipremium, btn_unban, btn_unmute, btn_back)
-        
-        bot.edit_message_text(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text=catalog_text,
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-        
-    elif call.data == "back_to_main":
+def callback_query(call):
+    # Удаляем сообщение с кнопками, на которые нажали (для чистоты чата)
+    try:
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        start_command(call.message)
+    except Exception as e:
+        print(f"Не удалось удалить сообщение с инлайн-кнопками: {e}")
 
-# Обработчик для любых других сообщений
-@bot.message_handler(func=lambda message: True)
-def other_messages(message):
-    bot.send_message(
-        message.chat.id,
-        "Пожалуйста, используй кнопки меню для навигации.",
-        reply_markup=main_keyboard()
-    )
+    # --- 1. РЕГЛАМЕНТ МАГАЗИНА ---
+    if call.data == 'rules':
+        markup_back = types.InlineKeyboardMarkup()
+        btn_rules2 = types.InlineKeyboardButton("📃 Регламент", callback_data='rules2', url="https://telegra.ph/Reglament-magazina-404hp-shop-02-21")
+        btn_back = types.InlineKeyboardButton("🔙 В главное меню", callback_data='back_to_main')
+        markup_back.add(btn_rules2, btn_back)
 
-# Запуск бота
+        rules_text = (
+            "📜 *Регламент магазина:*\n\n"
+            "🤝 Чтобы посмотреть  на регламент магазина нажми на кнопку регламента"
+        )
+        bot.send_message(call.message.chat.id, rules_text, parse_mode='Markdown', reply_markup=markup_back)
+
+    # --- 2. ГЛАВНОЕ МЕНЮ ТОВАРОВ (Список категорий) ---
+    elif call.data == 'products_main':
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        btn_month = types.InlineKeyboardButton("🥇 Премиум (1 месяц)", callback_data='buy_premium_month')
+        btn_year = types.InlineKeyboardButton("🏆 Премиум (1 год)", callback_data='buy_premium_year')
+        btn_unban = types.InlineKeyboardButton("🔨 Разбан", callback_data='buy_unban')
+        btn_unmute = types.InlineKeyboardButton("🤐 Размут", callback_data='buy_unmute')
+        btn_back = types.InlineKeyboardButton("🔙 В главное меню", callback_data='back_to_main')
+        markup.add(btn_month, btn_year, btn_unban, btn_unmute, btn_back)
+
+        bot.send_message(call.message.chat.id, "🛍️ *Выберите товар для покупки:*", parse_mode='Markdown', reply_markup=markup)
+
+    # --- 3. ОБРАБОТКА ПОКУПКИ КАЖДОГО ТОВАРА ---
+    elif call.data.startswith('buy_'):
+        product_key = call.data.replace('buy_', '')
+        product = products.get(product_key)
+
+        if product:
+            markup_pay = types.InlineKeyboardMarkup()
+            # Кнопка "Оплатить" (имитация оплаты)
+            btn_confirm = types.InlineKeyboardButton(f"✅ Оплатить {product['price']} руб.", callback_data=f'pay_{product_key}')
+            btn_back = types.InlineKeyboardButton("🔙 Назад к товарам", callback_data='products_main')
+            markup_pay.add(btn_confirm, btn_back)
+
+            buy_text = (
+                f"🛒 *Товар:* {product['name']}\n"
+                f"💰 *Цена:* {product['price']} руб.\n\n"
+                f"Нажмите 'Оплатить' для совершения покупки."
+            )
+            bot.send_message(call.message.chat.id, buy_text, parse_mode='Markdown', reply_markup=markup_pay)
+        else:
+            bot.send_message(call.message.chat.id, "Товар не найден.")
+# --- 4. ПОДТВЕРЖДЕНИЕ ОПЛАТЫ (Функция покупки) ---
+    elif call.data.startswith('pay_'):
+        product_key = call.data.replace('pay_', '')
+        product = products.get(product_key)
+
+        if product:
+            # Здесь должна быть логика проверки платежа, но мы просто имитируем успех
+            success_text = (
+                f"✅ *Покупка в процессе !*\n\n"
+                f"Вы хотите приобрести '{product['name']}'.\n"
+                f"Напишите нашим продавцам для оплаты товара @hp404prodv!"
+            )
+            # Добавляем кнопку возврата в меню
+            markup_back = types.InlineKeyboardMarkup()
+            btn_back = types.InlineKeyboardButton("🔙 В главное меню", callback_data='back_to_main')
+            markup_back.add(btn_back)
+            bot.send_message(call.message.chat.id, success_text, parse_mode='Markdown', reply_markup=markup_back)
+        else:
+            bot.send_message(call.message.chat.id, "Ошибка при обработке платежа.")
+
+    # --- 5. ТЕХНИЧЕСКАЯ ПОДДЕРЖКА (Контакты админов и описание) ---
+    elif call.data == 'support':
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        # Кнопки связи с продавцами (перенаправляем в раздел "Контакты продавцов")
+        btn_contact_seller = types.InlineKeyboardButton("👤 Связаться с продавцом", callback_data='seller_contacts')
+        btn_back = types.InlineKeyboardButton("🔙 В главное меню", callback_data='back_to_main')
+        markup.add(btn_contact_seller, btn_back)
+
+        support_text = (
+            "🆘 *Техническая поддержка*\n\n"
+            "📋 *Описание:*\n"
+            "Если у вас возникли проблемы с оплатой, получением товара или работой бота, вы можете обратиться к администраторам.\n\n"
+            "👮 *Контакты администрации:*\n"
+            "• linner: @nelinner\n"
+            "• Asquzyy : @asquzyyy\n"
+        )
+        bot.send_message(call.message.chat.id, support_text, parse_mode='Markdown', reply_markup=markup)
+
+    # --- 6. КОНТАКТЫ ПРОДАВЦОВ ---
+    elif call.data == 'seller_contacts':
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        # Кнопки для связи с продавцами
+        btn_seller1 = types.InlineKeyboardButton("linner", url="https://t.me/nelinner")
+        btn_seller2 = types.InlineKeyboardButton("Asquzyy ", url="https://t.me/@asquzyyy")
+        btn_back = types.InlineKeyboardButton("🔙 Назад", callback_data='support')
+        markup.add(btn_seller1, btn_seller2, btn_back)
+
+        contact_text = (
+            "👤 *Контакты продавцов*\n\n"
+            "Здесь вы можете напрямую связаться с продавцами для уточнения деталей товара, скорости выдачи или особых условий.\n\n"
+            "Нажмите на кнопку ниже, чтобы написать продавцу в личные сообщения:"
+        )
+        bot.send_message(call.message.chat.id, contact_text, parse_mode='Markdown', reply_markup=markup)
+
+    # --- 7. ВОЗВРАТ В ГЛАВНОЕ МЕНЮ ---
+    elif call.data == 'back_to_main':
+        # Переиспользуем функцию приветствия, чтобы показать главное меню
+        # Но нам нужно создать объект message-like для send_welcome
+        class Message:
+            def __init__(self, chat, from_user, message_id):
+                self.chat = chat
+                self.from_user = from_user
+                self.message_id = message_id
+
+        msg = Message(call.message.chat, call.from_user, call.message.message_id)
+        send_welcome(msg)
+
+# --- Запуск бота ---
 if __name__ == '__main__':
-    print("Бот запущен!")
+    print("Бот запущен...")
     bot.infinity_polling()
