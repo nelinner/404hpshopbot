@@ -1,0 +1,52 @@
+# database.py
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime, Text
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import declarative_base, sessionmaker
+from datetime import datetime
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    telegram_id = Column(Integer, unique=True, nullable=False)
+    nickname = Column(String(100))
+    kills = Column(Integer, default=0)
+    deaths = Column(Integer, default=0)
+    wins = Column(Integer, default=0)
+    losses = Column(Integer, default=0)
+    elo = Column(Float, default=1000.0)
+    role = Column(String(20), default="player")  # "player" или "admin"
+    registered_at = Column(DateTime, default=datetime.utcnow)
+
+class Lobby(Base):
+    __tablename__ = "lobbies"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    creator_id = Column(Integer, ForeignKey("users.telegram_id"))
+    max_players = Column(Integer, default=10)
+    status = Column(String(20), default="open")  # "open", "closed"
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class LobbyPlayer(Base):
+    __tablename__ = "lobby_players"
+    id = Column(Integer, primary_key=True)
+    lobby_id = Column(Integer, ForeignKey("lobbies.id"))
+    user_id = Column(Integer, ForeignKey("users.telegram_id"))
+
+class Complaint(Base):
+    __tablename__ = "complaints"
+    id = Column(Integer, primary_key=True)
+    from_user_id = Column(Integer, ForeignKey("users.telegram_id"))
+    against_user_id = Column(Integer, ForeignKey("users.telegram_id"))
+    reason = Column(Text)
+    status = Column(String(20), default="pending")  # "pending", "accepted", "rejected"
+    resolved_by = Column(Integer, ForeignKey("users.telegram_id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+engine = create_async_engine(DATABASE_URL, echo=False)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
